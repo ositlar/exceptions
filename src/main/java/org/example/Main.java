@@ -1,57 +1,32 @@
 package org.example;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Scanner;
+import org.example.enums.Names;
+import org.example.model.Store;
+import org.example.model.Toy;
+
+import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Введите данные (Фамилия Имя Отчество дата_рождения номер_телефона пол):");
-        String input = scanner.nextLine();
-        String[] data = input.split(" ");
-        if (data.length != 6) {
-            throw new IllegalArgumentException("Ошибка: Введено неверное количество данных.");
+        Store store = new Store();
+        Random rnd = new Random();
+        for (int i = 0; i < 10; i++) {
+            String name = Names.values()[rnd.nextInt(Names.values().length - 1)].name();
+            store.addToy(new Toy(i, name, rnd.nextInt(50), rnd.nextInt(40)));
         }
-        try {
-            String surname = data[0];
-            String name = data[1];
-            String patronymic = data[2];
-            if (!surname.matches("[а-яА-Я]+") || !name.matches("[а-яА-Я]+") || !patronymic.matches("[а-яА-Я]+")) {
-                throw new IllegalArgumentException("Ошибка: Неверный формат ФИО.");
+        for (int i = 0; i < 3; i++) {
+            Toy prize = store.selectPrizeToy();
+            if (prize != null) {
+                System.out.println("Выбран приз: " + prize);
+            } else {
+                System.out.println("Больше нет игрушек для розыгрыша");
             }
-            String dob = data[3];
-            String[] checkDob = dob.split("\\.");
-            if (checkDob.length == 3) {
-                for (int i = 0; i < checkDob.length; i++) {
-                    if (checkDob[i].length() < 2 || !checkDob[i].matches("[0-9]+") || checkDob[i].length() > 4) {
-                        throw new IllegalArgumentException("Ошибка: Неверный формат даты рождения.");
-                    }
-                }
+            Toy toyToDelivery = store.getPrizeToy();
+            if (toyToDelivery != null) {
+                System.out.println("Выдан приз: " + toyToDelivery);
+            } else {
+                System.out.println("Больше нет игрушек для выдачи");
             }
-
-            long phoneNumber;
-            try {
-                if (data[4].length() != 11 || !data[4].matches("[0-9]+")) {
-                    throw new IllegalArgumentException("Ошибка: Неверный формат номера телефона.");
-                }
-                phoneNumber = Long.parseLong(data[4]);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Ошибка: Неверный формат номера телефона.");
-            }
-            char gender = data[5].charAt(0);
-            if (gender != 'm' && gender != 'f') {
-                throw new IllegalArgumentException("Ошибка: Неверный формат пола.");
-            }
-
-            File file = new File(surname + ".txt");
-            FileWriter writer = new FileWriter(file, true);
-            writer.write(surname + " " + name + " " + patronymic + " " + dob + " " + phoneNumber + " " + gender + "\n");
-            writer.close();
-            System.out.println("Данные успешно записаны в файл: " + file.getName());
-        } catch (IOException e) {
-            throw new RuntimeException("Ошибка при записи в файл.");
         }
     }
 }
